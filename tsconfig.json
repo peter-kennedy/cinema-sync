@@ -19,6 +19,6 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["./client/src", "./server/*"],
+  "include": ["./client/src", "./server/*", ".eslintrc.cjs"],
   "references": [{ "path": "./client/tsconfig.node.json" }]
 }
