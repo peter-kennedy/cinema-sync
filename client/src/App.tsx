@@ -11,7 +11,12 @@ function App() {
     fetchData();
   }, []);
 
-  return <div className="container">{data}</div>;
+  return (
+    <>
+      <h1 className="text-2xl font-bold">Hello world!</h1>
+      <div className="text-2xl font-bold underline">{data}</div>
+    </>
+  );
 }
 
 export default App;
