@@ -19,6 +19,6 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["./client/**/*", "./server/*", ".eslintrc.cjs"],
+  "include": ["./client/**/*", "./server/**/*", ".eslintrc.cjs", "client/tailwind.config.cjs"],
   "references": [{ "path": "./client/tsconfig.node.json" }]
 }

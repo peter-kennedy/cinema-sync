@@ -13,8 +13,10 @@ function App() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold">Hello world!</h1>
-      <div className="text-2xl font-bold underline">{data}</div>
+      <h1 className="text-3x font-bold to-blue-300 bg-gradient-to-tr">
+        Hello world!
+      </h1>
+      <div className="text">{data}</div>
     </>
   );
 }
