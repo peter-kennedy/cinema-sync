@@ -1,0 +1,31 @@
+INSERT INTO watchlist (user_id, movie_id) VALUES ($1, $2)
+INSERT INTO users (id) VALUES($1)
+INSERT INTO users (username) VALUES($1)
+
+-- gets a user's watchlist
+SELECT id, title, title_card 
+FROM movies m 
+inner join watchlist w 
+on w.movie_id = m.id 
+where w.user_id = $1
+
+-- gets a user's watched movies
+SELECT id as movie_id, title, title_card 
+FROM movies m 
+inner join watched w 
+on w.movie_id = m.id 
+where w.user_id = 1
+
+-- gets intersection of two users watchlists
+SELECT id as movie_id, title, title_card 
+FROM movies m 
+inner join watchlist w 
+on w.movie_id = m.id 
+where (w.user_id = $1) 
+intersect
+SELECT id as movie_id, title, title_card 
+FROM movies m 
+inner join watchlist w 
+on w.movie_id = m.id 
+where (w.user_id = $2) 
+
