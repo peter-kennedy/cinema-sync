@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import query from '../models/model';
+import query from '../models/model.js';
 
 type User = {
   id: string;

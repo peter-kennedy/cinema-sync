@@ -1,11 +1,9 @@
 import pg from 'pg';
-import * as dotenv from 'dotenv';
 import colors from 'colors';
-
-dotenv.config();
+import config from './model.config.json' assert { type: 'json' };
 
 const pool = new pg.Pool({
-  connectionString: process.env.PG_URI,
+  connectionString: config.PG_URI,
 });
 
 /**

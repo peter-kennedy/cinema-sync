@@ -5,7 +5,10 @@ function App() {
 
   useEffect((): void => {
     async function fetchData(): Promise<void> {
-      const apiData: string = await (await fetch('/api')).json();
+      const apiData = await (
+        await fetch(`/api/movies/ownWatchlist/${1}`)
+      ).json();
+      console.log(apiData);
       setData(apiData);
     }
     fetchData();

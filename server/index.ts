@@ -1,10 +1,12 @@
 import express, { Request, Response } from 'express';
-import movieRouter from './routes/movies';
-import userRouter from './routes/users';
+import cors from 'cors';
+import movieRouter from './routes/movies.js';
+import userRouter from './routes/users.js';
 
 const PORT = 3000;
 const app = express();
 
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -14,7 +16,7 @@ app.get('/', (req: Request, res: Response) => {
 
 // API
 app.use('/movies', movieRouter);
-app.use('/movies', userRouter);
+app.use('/users', userRouter);
 
 // Catch-all route
 app.use('*', (req: Request, res: Response) => {
