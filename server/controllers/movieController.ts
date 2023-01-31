@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, request } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { QueryResult } from 'pg';
 import query from '../models/model.js';
 
@@ -14,7 +14,7 @@ const movieController = {
 
     try {
       const VALUES: Array<unknown> = [id];
-      const data: QueryResult<Movie> = await query(
+      const queryRes: QueryResult<Movie> = await query(
         `SELECT id, title, title_card 
       FROM movies m 
       inner join watchlist w 
@@ -23,7 +23,7 @@ const movieController = {
         VALUES,
         true
       );
-      res.locals.watchlist = data.rows;
+      res.locals.watchlist = queryRes.rows;
       return next();
     } catch (err) {
       return next({
@@ -39,7 +39,7 @@ const movieController = {
 
     try {
       const VALUES: Array<unknown> = [id];
-      const data: QueryResult<Movie> = await query(
+      const queryRes: QueryResult<Movie> = await query(
         `SELECT id as movie_id, title, title_card 
         FROM movies m 
         inner join watched w 
@@ -48,13 +48,48 @@ const movieController = {
         VALUES,
         true
       );
-      res.locals.watchedMovies = data;
+      res.locals.watchedMovies = queryRes.rows;
       return next();
     } catch (err) {
       return next({
         log: `Error in movieController.getWatched: ERROR: ${err}`,
         status: 500,
         message: 'Counld not get watched movies',
+      });
+    }
+  },
+
+  async getWatchlistIntersection(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const { user1, user2 } = req.body;
+
+    try {
+      const VALUES = [user1, user2];
+      const queryRes: QueryResult<Movie> = await query(
+        `SELECT id as movie_id, title, title_card 
+        FROM movies m 
+        inner join watchlist w 
+        on w.movie_id = m.id 
+        where (w.user_id = $1) 
+        intersect
+        SELECT id as movie_id, title, title_card 
+        FROM movies m 
+        inner join watchlist w 
+        on w.movie_id = m.id 
+        where (w.user_id = $2)`,
+        VALUES,
+        true
+      );
+      res.locals.watchlistIntersection = queryRes.rows;
+      return next();
+    } catch (err) {
+      return next({
+        log: `Error in movieController.getWatchlistIntersection: ERROR: ${err}`,
+        status: 500,
+        message: 'Counld not get watchlist intersection',
       });
     }
   },

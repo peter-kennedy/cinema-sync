@@ -9,41 +9,37 @@ const movieRouter = Router();
 // });
 
 // gets list of watched movies from pg DB
-movieRouter.get('/ownWatched', (_req, res) => {
+movieRouter.get('/watched/:id', (_req, res) => {
   res.json('some data');
 });
 
-movieRouter.put('/ownWatched', (_req, res) => {
+movieRouter.put('/watched/:id', (_req, res) => {
   res.json({ data: 'some data' });
 });
 
-movieRouter.delete('/ownWatched', (_req, res) => {
+movieRouter.delete('/watched/:id', (_req, res) => {
   res.json({ data: 'some data' });
 });
 
 // gets own watchlist from pg DB
-movieRouter.get(
-  '/ownWatchlist/:id',
-  movieController.getWatchlist,
-  (_req, res) => {
-    res.json(res.locals.watchlist);
-  }
-);
+movieRouter.get('/watchlist/:id', movieController.getWatchlist, (_req, res) => {
+  res.json(res.locals.watchlist);
+});
 
-// movieRouter.put('/ownWatchlist', (_req, res) => {
-//   res.json({ data: 'some data' });
-// });
-
-movieRouter.delete('/ownWatched', (_req, res) => {
+movieRouter.put('/watchlist/:id', (_req, res) => {
   res.json({ data: 'some data' });
 });
 
-movieRouter.get('/friendsWatched', (_req, res) => {
-  res.json(res.locals.movies);
+movieRouter.delete('/watchlist/:id', (_req, res) => {
+  res.json({ data: 'some data' });
 });
 
-movieRouter.get('/friendsWatchlist', (_req, res) => {
-  res.json(res.locals.movies);
-});
+movieRouter.get(
+  '/watchlist/intersection',
+  movieController.getWatchlistIntersection,
+  (req, res) => {
+    res.json(res.locals.watchlistIntersection);
+  }
+);
 
 export default movieRouter;
