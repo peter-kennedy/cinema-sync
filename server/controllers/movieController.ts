@@ -17,9 +17,9 @@ const movieController = {
       const queryRes: QueryResult<Movie> = await query(
         `SELECT id, title, title_card 
       FROM movies m 
-      inner join watchlist w 
-      on w.movie_id = m.id 
-      where w.user_id = $1`,
+      INNER JOIN watchlist w 
+      ON w.movie_id = m.id 
+      WHERE w.user_id = $1`,
         VALUES,
         true
       );
@@ -42,9 +42,9 @@ const movieController = {
       const queryRes: QueryResult<Movie> = await query(
         `SELECT id as movie_id, title, title_card 
         FROM movies m 
-        inner join watched w 
-        on w.movie_id = m.id 
-        where w.user_id = $1`,
+        INNER JOIN watched w 
+        ON w.movie_id = m.id 
+        WHERE w.user_id = $1`,
         VALUES,
         true
       );
@@ -71,15 +71,15 @@ const movieController = {
       const queryRes: QueryResult<Movie> = await query(
         `SELECT id as movie_id, title, title_card 
         FROM movies m 
-        inner join watchlist w 
-        on w.movie_id = m.id 
-        where (w.user_id = $1) 
-        intersect
+        INNER JOIN watchlist w 
+        ON w.movie_id = m.id 
+        WHERE (w.user_id = $1) 
+        INTERSECT
         SELECT id as movie_id, title, title_card 
         FROM movies m 
-        inner join watchlist w 
-        on w.movie_id = m.id 
-        where (w.user_id = $2)`,
+        INNER JOIN watchlist w 
+        ON w.movie_id = m.id 
+        WHERE (w.user_id = $2)`,
         VALUES,
         true
       );
