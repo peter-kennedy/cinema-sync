@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import movieController from '../controllers/movieController.js';
+import watchlistController from '../controllers/watchlistController.js';
+import watchedController from '../controllers/watchedController.js';
 
 const movieRouter = Router();
 
@@ -21,23 +22,35 @@ movieRouter.delete('/watched/:id', (_req, res) => {
   res.json({ data: 'some data' });
 });
 
-// gets own watchlist from pg DB
-movieRouter.get('/watchlist/:id', movieController.getWatchlist, (_req, res) => {
-  res.json(res.locals.watchlist);
-});
+// gets a users watchlist
+movieRouter.get(
+  '/watchlist/:id',
+  watchlistController.getWatchlist,
+  (_req, res) => {
+    res.json(res.locals.watchlist);
+  }
+);
 
-movieRouter.put('/watchlist/:id', (_req, res) => {
-  res.json({ data: 'some data' });
-});
+// adds a movie to a users watchlist
+movieRouter.put(
+  '/watchlist',
+  watchlistController.addWatchlistItem,
+  (_req, res) => {
+    res.json('Successfully added watchlist item');
+  }
+);
 
+// removes an item from a users watchlist
 movieRouter.delete('/watchlist/:id', (_req, res) => {
   res.json({ data: 'some data' });
 });
 
+// gets the intersection between two users watchlists
+// TO DO: add functionality to intersect an arbitrary number of user watchlists
 movieRouter.get(
   '/watchlist/intersection',
-  movieController.getWatchlistIntersection,
-  (req, res) => {
+  watchlistController.getWatchlistIntersection,
+  (_req, res) => {
     res.json(res.locals.watchlistIntersection);
   }
 );
