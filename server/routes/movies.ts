@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import movieController from '../controllers/movieController.js';
+import watchlistController from '../controllers/watchlistController.js';
+import watchedController from '../controllers/watchedController.js';
 
 const movieRouter = Router();
 
@@ -9,41 +10,76 @@ const movieRouter = Router();
 // });
 
 // gets list of watched movies from pg DB
-movieRouter.get('/ownWatched', (_req, res) => {
-  res.json('some data');
-});
-
-movieRouter.put('/ownWatched', (_req, res) => {
-  res.json({ data: 'some data' });
-});
-
-movieRouter.delete('/ownWatched', (_req, res) => {
-  res.json({ data: 'some data' });
-});
-
-// gets own watchlist from pg DB
 movieRouter.get(
-  '/ownWatchlist/:id',
-  movieController.getWatchlist,
+  '/watched/:id',
+  watchedController.getWatchedItems,
+  (_req, res) => {
+    res.json(res.locals.watchedMovies);
+  }
+);
+
+// adds movie to list of watched movies
+movieRouter.put(
+  '/watched/:userId/:movieId',
+  watchedController.addWatchedItem,
+  (_req, res) => {
+    res.json('Successfully added movie to watched movies');
+  }
+);
+
+// removes movie from list of watched movies
+movieRouter.delete(
+  '/watched/:userId/:movieId',
+  watchedController.removeWatchedItem,
+  (_req, res) => {
+    res.json('Successfully removed movie from watched movies');
+  }
+);
+
+// gets a users watchlist
+movieRouter.get(
+  '/watchlist/:id',
+  watchlistController.getWatchlist,
   (_req, res) => {
     res.json(res.locals.watchlist);
   }
 );
 
-// movieRouter.put('/ownWatchlist', (_req, res) => {
-//   res.json({ data: 'some data' });
-// });
+// adds a movie to a users watchlist
+movieRouter.put(
+  '/watchlist',
+  watchlistController.addWatchlistItem,
+  (_req, res) => {
+    res.json('Successfully added watchlist item');
+  }
+);
 
-movieRouter.delete('/ownWatched', (_req, res) => {
-  res.json({ data: 'some data' });
-});
+// removes an item from a users watchlist
+movieRouter.delete(
+  '/watchlist/:userId/:movieId',
+  watchedController.removeWatchedItem,
+  (_req, res) => {
+    res.json('Successfully removed movie from watchlist');
+  }
+);
 
-movieRouter.get('/friendsWatched', (_req, res) => {
-  res.json(res.locals.movies);
-});
+// gets the intersection between two users watchlists
+// TO DO: add functionality to intersect an arbitrary number of user watchlists
+movieRouter.get(
+  '/watchlist/intersection',
+  watchlistController.getWatchlistIntersection,
+  (_req, res) => {
+    res.json(res.locals.watchlistIntersection);
+  }
+);
 
-movieRouter.get('/friendsWatchlist', (_req, res) => {
-  res.json(res.locals.movies);
-});
+// Moves a movie from a users watchlist to their watched movies
+movieRouter.put(
+  '/watchlist/move-to-watched/:userId/:movieId',
+  watchlistController.moveToWatched,
+  (_req, res) => {
+    res.json(res.locals.watchlistIntersection);
+  }
+);
 
 export default movieRouter;

@@ -29,3 +29,14 @@ inner join watchlist w
 on w.movie_id = m.id 
 where (w.user_id = $2) 
 
+WITH new_movie AS (
+  INSERT INTO movies (id, title, title_card)
+  VALUES ($1, $2, $3)
+  WHERE NOT EXISTS (SELECT $4 FROM movies WHERE id = $1)
+  RETURNING id AS movie_id
+)
+INSERT INTO watchlist (user_id, movie_id)
+SELECT $4, movie_id
+FROM new_movie;
+
+
