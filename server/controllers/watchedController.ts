@@ -4,7 +4,7 @@ import query from '../models/model.js';
 import { Movie } from '../models/types.js';
 
 const watchedController = {
-  async getWatched(req: Request, res: Response, next: NextFunction) {
+  async getWatchedItems(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
 
     const getWatchedQuery = `SELECT id as movie_id, title, title_card 
@@ -70,9 +70,26 @@ const watchedController = {
     }
   },
 
-  async deleteWatchedItem(req: Request, _res: Response, next: NextFunction) {
-    const {}
-  }
+  async removeWatchedItem(req: Request, _res: Response, next: NextFunction) {
+    const { userId, movieId } = req.params;
+
+    const removeWatchedItemQuery =
+      'DELETE FROM watched WHERE user_id = $1 AND movie_id = $2;';
+
+    const VALUES = [userId, movieId];
+
+    try {
+      await query(removeWatchedItemQuery, VALUES, true);
+
+      return next();
+    } catch (err) {
+      return next({
+        log: `Error in watchedController.removeWatchedItem: ERROR: ${err}`,
+        status: 500,
+        message: 'Could not remove from watched movies',
+      });
+    }
+  },
 };
 
 export default watchedController;

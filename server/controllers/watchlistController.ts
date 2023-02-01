@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { QueryResult } from 'pg';
 import query from '../models/model.js';
 import { Movie } from '../models/types.js';
+import watchedController from './watchedController.js';
 // TODO: add removeWatchlistItem, and controller for marking an item watched
 const watchlistController = {
   async getWatchlist(req: Request, res: Response, next: NextFunction) {
@@ -98,6 +99,47 @@ const watchlistController = {
         log: `Error in watchlistController.getWatchlistIntersection: ERROR: ${err}`,
         status: 500,
         message: 'Could not get watchlist intersection',
+      });
+    }
+  },
+
+  async removeWatchlistItem(req: Request, _res: Response, next: NextFunction) {
+    const { userId, movieId } = req.params;
+
+    const removeWatchlistItemQuery =
+      'DELETE FROM watchlist WHERE user_id = $1 AND movie_id = $2;';
+
+    const VALUES = [userId, movieId];
+
+    try {
+      await query(removeWatchlistItemQuery, VALUES, true);
+
+      return next();
+    } catch (err) {
+      return next({
+        log: `Error in watchlistController.removeWatchlistItem: ERROR: ${err}`,
+        status: 500,
+        message: 'Could not remove from watchlist',
+      });
+    }
+  },
+
+  async moveToWatched(req: Request, res: Response, next: NextFunction) {
+    try {
+      await query('BEGIN');
+
+      await this.removeWatchlistItem(req, res, next);
+      await watchedController.addWatchedItem(req, res, next);
+
+      await query('COMMIT');
+
+      return next();
+    } catch (err) {
+      await query('ROLLBACK');
+      return next({
+        log: `Error in watchlistController.moveToWatched: ERROR: ${err}`,
+        status: 500,
+        message: 'Could not mark item as watched',
       });
     }
   },

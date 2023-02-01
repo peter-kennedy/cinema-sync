@@ -10,17 +10,31 @@ const movieRouter = Router();
 // });
 
 // gets list of watched movies from pg DB
-movieRouter.get('/watched/:id', (_req, res) => {
-  res.json('some data');
-});
+movieRouter.get(
+  '/watched/:id',
+  watchedController.getWatchedItems,
+  (_req, res) => {
+    res.json(res.locals.watchedMovies);
+  }
+);
 
-movieRouter.put('/watched/:id', (_req, res) => {
-  res.json({ data: 'some data' });
-});
+// adds movie to list of watched movies
+movieRouter.put(
+  '/watched/:userId/:movieId',
+  watchedController.addWatchedItem,
+  (_req, res) => {
+    res.json('Successfully added movie to watched movies');
+  }
+);
 
-movieRouter.delete('/watched/:id', (_req, res) => {
-  res.json({ data: 'some data' });
-});
+// removes movie from list of watched movies
+movieRouter.delete(
+  '/watched/:userId/:movieId',
+  watchedController.removeWatchedItem,
+  (_req, res) => {
+    res.json('Successfully removed movie from watched movies');
+  }
+);
 
 // gets a users watchlist
 movieRouter.get(
@@ -41,15 +55,28 @@ movieRouter.put(
 );
 
 // removes an item from a users watchlist
-movieRouter.delete('/watchlist/:id', (_req, res) => {
-  res.json({ data: 'some data' });
-});
+movieRouter.delete(
+  '/watchlist/:userId/:movieId',
+  watchedController.removeWatchedItem,
+  (_req, res) => {
+    res.json('Successfully removed movie from watchlist');
+  }
+);
 
 // gets the intersection between two users watchlists
 // TO DO: add functionality to intersect an arbitrary number of user watchlists
 movieRouter.get(
   '/watchlist/intersection',
   watchlistController.getWatchlistIntersection,
+  (_req, res) => {
+    res.json(res.locals.watchlistIntersection);
+  }
+);
+
+// Moves a movie from a users watchlist to their watched movies
+movieRouter.put(
+  '/watchlist/move-to-watched/:userId/:movieId',
+  watchlistController.moveToWatched,
   (_req, res) => {
     res.json(res.locals.watchlistIntersection);
   }
