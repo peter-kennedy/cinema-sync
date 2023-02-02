@@ -1,28 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
-import { QueryResult } from 'pg';
 import query from '../models/model.js';
-import { Movie } from '../models/types.js';
-import watchedController from './watchedController.js';
-// TODO: add removeWatchlistItem, and controller for marking an item watched
+import Watchlist from '../models/Watchlist.js';
+import WatchedMovies from '../models/WatchedMovies.js';
+
 const watchlistController = {
   async getWatchlist(req: Request, res: Response, next: NextFunction) {
     const { id } = req.params;
 
-    const getWatchlistQuery = `SELECT id, title, title_card 
-    FROM movies m 
-    INNER JOIN watchlist w 
-    ON w.movie_id = m.id 
-    WHERE w.user_id = $1;`;
-
-    const VALUES: Array<unknown> = [id];
-
     try {
-      const getWatchlistQueryRes: QueryResult<Movie> = await query(
-        getWatchlistQuery,
-        VALUES,
-        true
-      );
-      res.locals.watchlist = getWatchlistQueryRes.rows;
+      res.locals.watchlist = await Watchlist.getWatchlist(id);
+
       return next();
     } catch (err) {
       return next({
@@ -35,20 +22,13 @@ const watchlistController = {
   async addWatchlistItem(req: Request, res: Response, next: NextFunction) {
     const { movieId, title, titleCard, userId } = req.body;
 
-    const addWatchlistItemQuery = `WITH new_movie AS (
-        INSERT INTO movies (id, title, title_card)
-        VALUES ($1, $2, $3)
-        WHERE NOT EXISTS (SELECT $4 FROM movies WHERE id = $1)
-        RETURNING id AS movie_id
-      )
-      INSERT INTO watchlist (user_id, movie_id)
-      SELECT $4, movie_id
-      FROM new_movie;`;
-
-    const VALUES = [movieId, title, titleCard, userId];
-
     try {
-      const queryRes = await query(addWatchlistItemQuery, VALUES, true);
+      const queryRes = await Watchlist.insertMovie(
+        movieId,
+        title,
+        titleCard,
+        userId
+      );
 
       if (queryRes.rowCount === 0) {
         return next({
@@ -76,23 +56,10 @@ const watchlistController = {
     const { user1, user2 } = req.body;
 
     try {
-      const VALUES = [user1, user2];
-      const queryRes: QueryResult<Movie> = await query(
-        `SELECT id as movie_id, title, title_card 
-        FROM movies m 
-        INNER JOIN watchlist w 
-        ON w.movie_id = m.id 
-        WHERE (w.user_id = $1) 
-        INTERSECT
-        SELECT id as movie_id, title, title_card 
-        FROM movies m 
-        INNER JOIN watchlist w 
-        ON w.movie_id = m.id 
-        WHERE (w.user_id = $2);`,
-        VALUES,
-        true
+      res.locals.watchlistIntersection = await Watchlist.getIntersection(
+        user1,
+        user2
       );
-      res.locals.watchlistIntersection = queryRes.rows;
       return next();
     } catch (err) {
       return next({
@@ -106,30 +73,27 @@ const watchlistController = {
   async removeWatchlistItem(req: Request, _res: Response, next: NextFunction) {
     const { userId, movieId } = req.params;
 
-    const removeWatchlistItemQuery =
-      'DELETE FROM watchlist WHERE user_id = $1 AND movie_id = $2;';
-
-    const VALUES = [userId, movieId];
-
     try {
-      await query(removeWatchlistItemQuery, VALUES, true);
+      await Watchlist.removeMovie(userId, movieId);
 
       return next();
     } catch (err) {
       return next({
-        log: `Error in watchlistController.removeWatchlistItem: ERROR: ${err}`,
+        log: `Error in watchlistController.removeWatchlistItem: ${err}`,
         status: 500,
         message: 'Could not remove from watchlist',
       });
     }
   },
 
-  async moveToWatched(req: Request, res: Response, next: NextFunction) {
+  async moveToWatched(req: Request, _res: Response, next: NextFunction) {
+    const { title, titleCard } = req.body;
+    const { userId, movieId } = req.params;
     try {
       await query('BEGIN');
 
-      await this.removeWatchlistItem(req, res, next);
-      await watchedController.addWatchedItem(req, res, next);
+      await Watchlist.removeMovie(userId, movieId);
+      await WatchedMovies.insertMovie(movieId, title, titleCard, userId);
 
       await query('COMMIT');
 
@@ -137,7 +101,7 @@ const watchlistController = {
     } catch (err) {
       await query('ROLLBACK');
       return next({
-        log: `Error in watchlistController.moveToWatched: ERROR: ${err}`,
+        log: `Error in watchlistController.moveToWatched: ${err}`,
         status: 500,
         message: 'Could not mark item as watched',
       });
