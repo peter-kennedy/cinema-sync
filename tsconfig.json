@@ -20,6 +20,6 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["./client/**/*", "./server/**/*", ".eslintrc.cjs", "client/tailwind.config.cjs"],
+  "include": ["./client/**/*", "./server/**/*", ".eslintrc.cjs", "client/tailwind.config.cjs", "server/controllers/watchlistController.test.ts"],
   "references": [{ "path": "./client/tsconfig.node.json" }]
 }
