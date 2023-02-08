@@ -19,13 +19,9 @@ movieRouter.get(
 );
 
 // adds movie to list of watched movies
-movieRouter.put(
-  '/watched/:userId/:movieId',
-  watchedController.addWatchedItem,
-  (_req, res) => {
-    res.json('Successfully added movie to watched movies');
-  }
-);
+movieRouter.put('/watched', watchedController.addWatchedItem, (_req, res) => {
+  res.json('Successfully added movie to watched movies');
+});
 
 // removes movie from list of watched movies
 movieRouter.delete(
@@ -46,7 +42,7 @@ movieRouter.get(
 );
 
 // adds a movie to a users watchlist
-movieRouter.put(
+movieRouter.post(
   '/watchlist',
   watchlistController.addWatchlistItem,
   (_req, res) => {

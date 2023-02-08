@@ -1,9 +1,11 @@
 import pg from 'pg';
 import colors from 'colors';
-import config from './model.config.json' assert { type: 'json' };
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: '../.env' });
 
 const pool = new pg.Pool({
-  connectionString: config.PG_URI,
+  connectionString: process.env.PG_URI,
 });
 
 /**
@@ -12,6 +14,7 @@ const pool = new pg.Pool({
  * @param {any[]} params
  * @param {boolean} log Whether or not to log the query to the console. Default `false`
  */
+
 export default function query(
   queryString: string,
   params?: Array<unknown>,

@@ -22,25 +22,36 @@ const WatchedMovies = {
     titleCard: string,
     userId: string
   ) {
-    const queryString = `WITH new_movie AS (
-        INSERT INTO movies (id, title, title_card)
-        SELECT $1::integer, $2, $3
-        WHERE NOT EXISTS (SELECT FROM movies WHERE id = $1::integer)
-        RETURNING id::integer
-        ),
-        new_watched AS (
-        INSERT INTO watched (user_id, movie_id)
-        SELECT $4::integer, id
-        FROM new_movie
-        WHERE NOT EXISTS (SELECT FROM watched WHERE user_id = $4::integer AND movie_id = $1::integer)
-        RETURNING *
-        )
-        SELECT *
-        FROM new_watched;`;
+    await query('BEGIN');
 
-    const VALUES = [movieId, title, titleCard, userId];
-    const queryRes = await query(queryString, VALUES, true);
-    return queryRes;
+    const hasMovieQuery = 'SELECT * FROM movies WHERE id = $1::integer;';
+
+    const hasMovieQueryRes = await query(hasMovieQuery, [movieId]);
+
+    if (hasMovieQueryRes.rowCount === 0) {
+      await query(
+        `INSERT INTO movies (id, title, title_card)
+      SELECT $1::integer, $2, $3
+      WHERE NOT EXISTS (SELECT FROM movies WHERE id = $1::integer);`,
+        [movieId, title, titleCard],
+        true
+      );
+    }
+
+    const addToWatchedQuery = `
+        INSERT INTO watched (user_id, movie_id)
+        VALUES ($1::integer, $2::integer);
+       `;
+
+    const addToWatchedQueryRes = await query(
+      addToWatchedQuery,
+      [userId, movieId],
+      true
+    );
+
+    await query('COMMIT');
+
+    return addToWatchedQueryRes;
   },
 
   async removeMovie(userId: string, movieId: string) {
@@ -56,3 +67,19 @@ const WatchedMovies = {
 };
 
 export default WatchedMovies;
+
+// const queryString = `WITH new_movie AS (
+//   INSERT INTO movies (id, title, title_card)
+//   SELECT $1::integer, $2, $3
+//   WHERE NOT EXISTS (SELECT FROM movies WHERE id = $1::integer)
+//   RETURNING id::integer
+//   ),
+//   new_watched AS (
+//   INSERT INTO watched (user_id, movie_id)
+//   SELECT $4::integer, id
+//   FROM new_movie
+//   WHERE NOT EXISTS (SELECT FROM watched WHERE user_id = $4::integer AND movie_id = $1::integer)
+//   RETURNING *
+//   )
+//   SELECT *
+//   FROM new_watched;`;
